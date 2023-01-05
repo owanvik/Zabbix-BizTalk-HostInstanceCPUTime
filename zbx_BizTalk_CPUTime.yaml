@@ -1,0 +1,139 @@
+zabbix_export:
+  version: '6.2'
+  date: '2023-01-05T11:50:38Z'
+  template_groups:
+    -
+      uuid: 7df96b18c230490a9a0a9e2307226338
+      name: Templates
+    -
+      uuid: 97178e695e264821a9559e0816d6d808
+      name: Templates/Biztalk
+  templates:
+    -
+      uuid: c008c55a276f459ca1f09edda706614b
+      template: 'Template App BizTalk CPU Time'
+      name: 'Template App BizTalk CPU Time'
+      groups:
+        -
+          name: Templates
+        -
+          name: Templates/Biztalk
+      items:
+        -
+          uuid: 894453764b0f48ffb1ef8b4167774446
+          name: 'Host Instances CPU Time'
+          key: 'vfs.file.contents[C:\ESB\Tools\HostInstancesCPUTime.json]'
+          delay: 30s
+          trends: '0'
+          value_type: TEXT
+          preprocessing:
+            -
+              type: JSONPATH
+              parameters:
+                - '$..*'
+      discovery_rules:
+        -
+          uuid: 23be93098e5a4e28af1856145d570227
+          name: 'Host Instance CPU Time'
+          type: DEPENDENT
+          key: host.instance.cpu.time
+          delay: '0'
+          item_prototypes:
+            -
+              uuid: f17ee7812a824217a885b93801a77766
+              name: '{#HI.NAME} - Service CPU Time'
+              type: DEPENDENT
+              key: 'cpu.time.[{#HI.NAME}]'
+              delay: '0'
+              value_type: FLOAT
+              preprocessing:
+                -
+                  type: JSONPATH
+                  parameters:
+                    - '$..[?(@.Name == "{#HI.NAME}")].CPUTime'
+                -
+                  type: LTRIM
+                  parameters:
+                    - '['
+                -
+                  type: RTRIM
+                  parameters:
+                    - ']'
+                -
+                  type: JAVASCRIPT
+                  parameters:
+                    - 'return (value*0.1).toFixed(1);'
+              master_item:
+                key: 'vfs.file.contents[C:\ESB\Tools\HostInstancesCPUTime.json]'
+              trigger_prototypes:
+                -
+                  uuid: cdb221f8467c4dfe9ab5538acd1d1c87
+                  expression: 'last(/Template App BizTalk CPU Time/cpu.time.[{#HI.NAME}])>{$HOST.INST.CPU.TIME.AVG}'
+                  name: 'CPU Time on {#HI.NAME} is over {$HOST.INST.CPU.TIME.AVG}%'
+                  priority: AVERAGE
+                  dependencies:
+                    -
+                      name: 'CPU Time on {#HI.NAME} is over {$HOST.INST.CPU.TIME.HIGH}%'
+                      expression: 'last(/Template App BizTalk CPU Time/cpu.time.[{#HI.NAME}])>{$HOST.INST.CPU.TIME.HIGH}'
+                -
+                  uuid: c538f42b65114e25aeafecb17c440972
+                  expression: 'last(/Template App BizTalk CPU Time/cpu.time.[{#HI.NAME}])>{$HOST.INST.CPU.TIME.CRIT}'
+                  name: 'CPU Time on {#HI.NAME} is over {$HOST.INST.CPU.TIME.CRIT}%'
+                  priority: DISASTER
+                -
+                  uuid: 67d6b861e3a8496fbdc243388bb01043
+                  expression: 'last(/Template App BizTalk CPU Time/cpu.time.[{#HI.NAME}])>{$HOST.INST.CPU.TIME.HIGH}'
+                  name: 'CPU Time on {#HI.NAME} is over {$HOST.INST.CPU.TIME.HIGH}%'
+                  priority: HIGH
+                  dependencies:
+                    -
+                      name: 'CPU Time on {#HI.NAME} is over {$HOST.INST.CPU.TIME.CRIT}%'
+                      expression: 'last(/Template App BizTalk CPU Time/cpu.time.[{#HI.NAME}])>{$HOST.INST.CPU.TIME.CRIT}'
+                -
+                  uuid: 501ada0f7899413083bc0275aa73f0bc
+                  expression: 'last(/Template App BizTalk CPU Time/cpu.time.[{#HI.NAME}])>{$HOST.INST.CPU.TIME.WARN}'
+                  name: 'CPU Time on {#HI.NAME} is over {$HOST.INST.CPU.TIME.WARN}%'
+                  priority: WARNING
+                  dependencies:
+                    -
+                      name: 'CPU Time on {#HI.NAME} is over {$HOST.INST.CPU.TIME.AVG}%'
+                      expression: 'last(/Template App BizTalk CPU Time/cpu.time.[{#HI.NAME}])>{$HOST.INST.CPU.TIME.AVG}'
+          master_item:
+            key: 'vfs.file.contents[C:\ESB\Tools\HostInstancesCPUTime.json]'
+          lld_macro_paths:
+            -
+              lld_macro: '{#HI.NAME}'
+              path: $.Name
+      macros:
+        -
+          macro: '{$HOST.INST.CPU.TIME.AVG}'
+          value: '60'
+          description: 'CPU Utilization in %'
+        -
+          macro: '{$HOST.INST.CPU.TIME.CRIT}'
+          value: '90'
+          description: 'CPU Utilization in %'
+        -
+          macro: '{$HOST.INST.CPU.TIME.HIGH}'
+          value: '70'
+          description: 'CPU Utilization in %'
+        -
+          macro: '{$HOST.INST.CPU.TIME.WARN}'
+          value: '50'
+          description: 'CPU Utilization in %'
+        -
+          macro: '{$SERVICE.NAME.MATCHES}'
+          value: '^(?:BTSSvc.+|MyOtherBTServices.)$'
+          description: 'This macro is used in Service discovery. Can be overridden on the host or linked template level.'
+        -
+          macro: '{$SERVICE.NAME.NOT_MATCHES}'
+          value: '^(?:BTSSvc.ExcludeMe1|BTSSvc.ExcludeMe2)$'
+          description: 'This macro is used in Service discovery. Can be overridden on the host or linked template level.'
+        -
+          macro: '{$SERVICE.STARTUPNAME.MATCHES}'
+          value: '^(?:automatic|automatic delayed)$'
+          description: 'This macro is used in Service discovery. Can be overridden on the host or linked template level.'
+        -
+          macro: '{$SERVICE.STARTUPNAME.NOT_MATCHES}'
+          value: '^(?:manual|disabled)$'
+          description: 'This macro is used in Service discovery. Can be overridden on the host or linked template level.'

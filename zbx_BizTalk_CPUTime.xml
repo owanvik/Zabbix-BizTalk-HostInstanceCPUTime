@@ -1,0 +1,191 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<zabbix_export>
+    <version>6.2</version>
+    <date>2023-01-05T11:51:07Z</date>
+    <template_groups>
+        <template_group>
+            <uuid>7df96b18c230490a9a0a9e2307226338</uuid>
+            <name>Templates</name>
+        </template_group>
+        <template_group>
+            <uuid>97178e695e264821a9559e0816d6d808</uuid>
+            <name>Templates/Biztalk</name>
+        </template_group>
+    </template_groups>
+    <templates>
+        <template>
+            <uuid>c008c55a276f459ca1f09edda706614b</uuid>
+            <template>Template App BizTalk CPU Time</template>
+            <name>Template App BizTalk CPU Time</name>
+            <groups>
+                <group>
+                    <name>Templates</name>
+                </group>
+                <group>
+                    <name>Templates/Biztalk</name>
+                </group>
+            </groups>
+            <items>
+                <item>
+                    <uuid>894453764b0f48ffb1ef8b4167774446</uuid>
+                    <name>Host Instances CPU Time</name>
+                    <key>vfs.file.contents[C:\ESB\Tools\HostInstancesCPUTime.json]</key>
+                    <delay>30s</delay>
+                    <trends>0</trends>
+                    <value_type>TEXT</value_type>
+                    <preprocessing>
+                        <step>
+                            <type>JSONPATH</type>
+                            <parameters>
+                                <parameter>$..*</parameter>
+                            </parameters>
+                        </step>
+                    </preprocessing>
+                </item>
+            </items>
+            <discovery_rules>
+                <discovery_rule>
+                    <uuid>23be93098e5a4e28af1856145d570227</uuid>
+                    <name>Host Instance CPU Time</name>
+                    <type>DEPENDENT</type>
+                    <key>host.instance.cpu.time</key>
+                    <delay>0</delay>
+                    <item_prototypes>
+                        <item_prototype>
+                            <uuid>f17ee7812a824217a885b93801a77766</uuid>
+                            <name>{#HI.NAME} - Service CPU Time</name>
+                            <type>DEPENDENT</type>
+                            <key>cpu.time.[{#HI.NAME}]</key>
+                            <delay>0</delay>
+                            <value_type>FLOAT</value_type>
+                            <preprocessing>
+                                <step>
+                                    <type>JSONPATH</type>
+                                    <parameters>
+                                        <parameter>$..[?(@.Name == &quot;{#HI.NAME}&quot;)].CPUTime</parameter>
+                                    </parameters>
+                                </step>
+                                <step>
+                                    <type>LTRIM</type>
+                                    <parameters>
+                                        <parameter>[</parameter>
+                                    </parameters>
+                                </step>
+                                <step>
+                                    <type>RTRIM</type>
+                                    <parameters>
+                                        <parameter>]</parameter>
+                                    </parameters>
+                                </step>
+                                <step>
+                                    <type>JAVASCRIPT</type>
+                                    <parameters>
+                                        <parameter>return (value*0.1).toFixed(1);</parameter>
+                                    </parameters>
+                                </step>
+                            </preprocessing>
+                            <master_item>
+                                <key>vfs.file.contents[C:\ESB\Tools\HostInstancesCPUTime.json]</key>
+                            </master_item>
+                            <trigger_prototypes>
+                                <trigger_prototype>
+                                    <uuid>cdb221f8467c4dfe9ab5538acd1d1c87</uuid>
+                                    <expression>last(/Template App BizTalk CPU Time/cpu.time.[{#HI.NAME}])&gt;{$HOST.INST.CPU.TIME.AVG}</expression>
+                                    <name>CPU Time on {#HI.NAME} is over {$HOST.INST.CPU.TIME.AVG}%</name>
+                                    <priority>AVERAGE</priority>
+                                    <dependencies>
+                                        <dependency>
+                                            <name>CPU Time on {#HI.NAME} is over {$HOST.INST.CPU.TIME.HIGH}%</name>
+                                            <expression>last(/Template App BizTalk CPU Time/cpu.time.[{#HI.NAME}])&gt;{$HOST.INST.CPU.TIME.HIGH}</expression>
+                                        </dependency>
+                                    </dependencies>
+                                </trigger_prototype>
+                                <trigger_prototype>
+                                    <uuid>c538f42b65114e25aeafecb17c440972</uuid>
+                                    <expression>last(/Template App BizTalk CPU Time/cpu.time.[{#HI.NAME}])&gt;{$HOST.INST.CPU.TIME.CRIT}</expression>
+                                    <name>CPU Time on {#HI.NAME} is over {$HOST.INST.CPU.TIME.CRIT}%</name>
+                                    <priority>DISASTER</priority>
+                                </trigger_prototype>
+                                <trigger_prototype>
+                                    <uuid>67d6b861e3a8496fbdc243388bb01043</uuid>
+                                    <expression>last(/Template App BizTalk CPU Time/cpu.time.[{#HI.NAME}])&gt;{$HOST.INST.CPU.TIME.HIGH}</expression>
+                                    <name>CPU Time on {#HI.NAME} is over {$HOST.INST.CPU.TIME.HIGH}%</name>
+                                    <priority>HIGH</priority>
+                                    <dependencies>
+                                        <dependency>
+                                            <name>CPU Time on {#HI.NAME} is over {$HOST.INST.CPU.TIME.CRIT}%</name>
+                                            <expression>last(/Template App BizTalk CPU Time/cpu.time.[{#HI.NAME}])&gt;{$HOST.INST.CPU.TIME.CRIT}</expression>
+                                        </dependency>
+                                    </dependencies>
+                                </trigger_prototype>
+                                <trigger_prototype>
+                                    <uuid>501ada0f7899413083bc0275aa73f0bc</uuid>
+                                    <expression>last(/Template App BizTalk CPU Time/cpu.time.[{#HI.NAME}])&gt;{$HOST.INST.CPU.TIME.WARN}</expression>
+                                    <name>CPU Time on {#HI.NAME} is over {$HOST.INST.CPU.TIME.WARN}%</name>
+                                    <priority>WARNING</priority>
+                                    <dependencies>
+                                        <dependency>
+                                            <name>CPU Time on {#HI.NAME} is over {$HOST.INST.CPU.TIME.AVG}%</name>
+                                            <expression>last(/Template App BizTalk CPU Time/cpu.time.[{#HI.NAME}])&gt;{$HOST.INST.CPU.TIME.AVG}</expression>
+                                        </dependency>
+                                    </dependencies>
+                                </trigger_prototype>
+                            </trigger_prototypes>
+                        </item_prototype>
+                    </item_prototypes>
+                    <master_item>
+                        <key>vfs.file.contents[C:\ESB\Tools\HostInstancesCPUTime.json]</key>
+                    </master_item>
+                    <lld_macro_paths>
+                        <lld_macro_path>
+                            <lld_macro>{#HI.NAME}</lld_macro>
+                            <path>$.Name</path>
+                        </lld_macro_path>
+                    </lld_macro_paths>
+                </discovery_rule>
+            </discovery_rules>
+            <macros>
+                <macro>
+                    <macro>{$HOST.INST.CPU.TIME.AVG}</macro>
+                    <value>60</value>
+                    <description>CPU Utilization in %</description>
+                </macro>
+                <macro>
+                    <macro>{$HOST.INST.CPU.TIME.CRIT}</macro>
+                    <value>90</value>
+                    <description>CPU Utilization in %</description>
+                </macro>
+                <macro>
+                    <macro>{$HOST.INST.CPU.TIME.HIGH}</macro>
+                    <value>70</value>
+                    <description>CPU Utilization in %</description>
+                </macro>
+                <macro>
+                    <macro>{$HOST.INST.CPU.TIME.WARN}</macro>
+                    <value>50</value>
+                    <description>CPU Utilization in %</description>
+                </macro>
+                <macro>
+                    <macro>{$SERVICE.NAME.MATCHES}</macro>
+                    <value>^(?:BTSSvc.+|MyOtherBTServices.)$</value>
+                    <description>This macro is used in Service discovery. Can be overridden on the host or linked template level.</description>
+                </macro>
+                <macro>
+                    <macro>{$SERVICE.NAME.NOT_MATCHES}</macro>
+                    <value>^(?:BTSSvc.ExcludeMe1|BTSSvc.ExcludeMe2)$</value>
+                    <description>This macro is used in Service discovery. Can be overridden on the host or linked template level.</description>
+                </macro>
+                <macro>
+                    <macro>{$SERVICE.STARTUPNAME.MATCHES}</macro>
+                    <value>^(?:automatic|automatic delayed)$</value>
+                    <description>This macro is used in Service discovery. Can be overridden on the host or linked template level.</description>
+                </macro>
+                <macro>
+                    <macro>{$SERVICE.STARTUPNAME.NOT_MATCHES}</macro>
+                    <value>^(?:manual|disabled)$</value>
+                    <description>This macro is used in Service discovery. Can be overridden on the host or linked template level.</description>
+                </macro>
+            </macros>
+        </template>
+    </templates>
+</zabbix_export>
