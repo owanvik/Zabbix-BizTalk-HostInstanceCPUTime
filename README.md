@@ -5,7 +5,7 @@ Installation:
 
 1. Create ```C:\ESB\Tools``` on your BizTalk server(s)
 
-(This folder can be changed, but remember to update both the script output and the ```vfs.file.contents``` items in the template)
+(This path can be changed, but remember to update both the script output and the ```vfs.file.contents``` items in the template)
 
 2. Create a scheduled task that runs ```powershell.exe -ExecutionPolicy Bypass "<path>\HostInstanceCPUTime.ps1"``` at some point on the day, and repeats every 5 minutes for the duration of 1 day.
 
